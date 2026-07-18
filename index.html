@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#B8431C">
+<title>Friends Tea Kadai — POS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:#B8431C;
+    --primary-dark:#8F3212;
+    --primary-soft:#F1D9C4;
+    --accent:#E8A33D;
+    --accent-dark:#C97F1F;
+    --green:#3F7D4C;
+    --green-dark:#2E5E38;
+    --green-soft:#DCEAE0;
+    --danger:#B23A3A;
+    --danger-soft:#F5DEDE;
+    --bg:#F6EEE0;
+    --card:#FFFDF9;
+    --border:#E4D3BB;
+    --text:#2B1B12;
+    --muted:#8B7361;
+    --shadow:0 4px 14px rgba(43,27,18,0.10);
+    --shadow-lg:0 10px 30px rgba(43,27,18,0.18);
+    --cash:#3F7D4C;
+    --upi:#3A6EA5;
+    --upi-soft:#DCE7F2;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 8% 0%, rgba(184,67,28,0.06), transparent 40%),
+      radial-gradient(circle at 100% 20%, rgba(232,163,61,0.08), transparent 45%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Mukta',sans-serif;
+    max-width:520px;
+    margin:0 auto;
+    min-height:100vh;
+    position:relative;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.display{font-family:'Baloo 2',cursive;}
+  button{font-family:inherit; cursor:pointer;}
+  input{font-family:inherit;}
+  .press{transition:transform 0.12s ease;}
+  .press:active{transform:scale(0.96);}
+  ::-webkit-scrollbar{display:none;}
+
+  /* ---------- Search bar ---------- */
+  .search-wrap{padding:14px 16px 0;}
+  .search-box{
+    display:flex; align-items:center; gap:8px;
+    background:var(--card); border:1.5px solid var(--border); border-radius:14px;
+    padding:11px 14px; box-shadow:var(--shadow);
+  }
+  .search-box svg{flex-shrink:0; opacity:0.55;}
+  .search-box input{
+    border:none; outline:none; background:none; flex:1; font-size:14.5px; color:var(--text);
+  }
+  .search-box input::placeholder{color:var(--muted);}
+  .search-clear{
+    background:var(--bg); border:none; color:var(--muted); width:20px; height:20px; border-radius:50%;
+    font-size:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+
+  /* ---------- Category tabs ---------- */
+  .cat-tabs{
+    display:flex; gap:8px; overflow-x:auto; padding:12px 16px 4px; scrollbar-width:none;
+  }
+  .cat-tabs::-webkit-scrollbar{display:none;}
+  .cat-chip{
+    flex-shrink:0; border:1.5px solid var(--border); background:var(--card); color:var(--muted);
+    padding:8px 16px; border-radius:20px; font-weight:700; font-size:13px;
+    display:flex; align-items:center; gap:6px; white-space:nowrap;
+  }
+  .cat-chip.active{background:var(--primary); border-color:var(--primary); color:#fff; box-shadow:var(--shadow);}
+
+  /* ---------- Split payment ---------- */
+  .pay-method-tabs{
+    display:flex; gap:8px; background:var(--bg); border:1.5px solid var(--border);
+    border-radius:16px; padding:5px; margin-bottom:20px;
+  }
+  .pay-method-tab{
+    flex:1; border:none; background:none; color:var(--muted); padding:10px 0;
+    border-radius:12px; font-weight:700; font-size:13.5px; display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .pay-method-tab.active{background:var(--card); color:var(--text); box-shadow:var(--shadow);}
+  .split-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--card); border:1.5px solid var(--border); border-radius:14px;
+    padding:12px 16px; margin-bottom:10px;
+  }
+  .split-row .sr-label{display:flex; align-items:center; gap:8px; font-weight:700; font-size:14px;}
+  .split-row .sr-tag{width:9px; height:9px; border-radius:50%;}
+  .split-row input{
+    border:none; outline:none; background:none; text-align:right; font-size:18px; font-weight:800;
+    font-family:'Baloo 2',cursive; color:var(--text); width:100px;
+  }
+  .split-hint{font-size:12px; text-align:right; margin:-2px 2px 16px; font-weight:600;}
+  .split-hint.ok{color:var(--green-dark);}
+  .split-hint.bad{color:var(--danger);}
+  .qr-box.compact{aspect-ratio:auto; max-width:200px; padding:10px; margin-bottom:16px;}
+
+  /* ---------- Chart ---------- */
+  .chart-card{
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
+    margin:4px 16px 8px; padding:16px 14px 10px; box-shadow:var(--shadow);
+  }
+  .chart-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .chart-head h4{margin:0; font-size:14px;}
+  .chart-toggle{display:flex; gap:4px; background:var(--bg); border-radius:10px; padding:3px;}
+  .chart-toggle button{
+    border:none; background:none; color:var(--muted); font-size:11.5px; font-weight:700;
+    padding:6px 10px; border-radius:8px;
+  }
+  .chart-toggle button.active{background:var(--primary); color:#fff;}
+  .chart-canvas-wrap{position:relative; height:120px;}
+
+  /* ---------- Screens ---------- */
+  .screen{display:none; min-height:100vh; padding-bottom:24px;}
+  .screen.active{display:block;}
+
+  /* ---------- Top bar (shared) ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    background:var(--primary);
+    color:#fff;
+    padding:16px 16px;
+    display:flex; align-items:center; gap:12px;
+    box-shadow:var(--shadow);
+  }
+  .topbar .back-btn{
+    width:36px;height:36px;border-radius:50%;
+    background:rgba(255,255,255,0.18); border:none; color:#fff;
+    font-size:18px; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .topbar h2{margin:0; font-size:19px; font-weight:700; flex:1;}
+  .topbar .badge-btn{
+    background:rgba(255,255,255,0.18); border:none; color:#fff;
+    padding:8px 14px; border-radius:20px; font-size:13px; font-weight:600;
+    display:flex; align-items:center; gap:6px;
+  }
+  .badge-count{
+    background:var(--accent); color:#3A2405; border-radius:50%;
+    min-width:18px; height:18px; font-size:11px; font-weight:800;
+    display:flex; align-items:center; justify-content:center; padding:0 4px;
+  }
+
+  /* ---------- Home ---------- */
+  .home-hero{
+    background:linear-gradient(160deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color:#fff; padding:18px 22px 26px; border-radius:0 0 24px 24px;
+    position:relative; overflow:hidden;
+  }
+  .steam-wrap{position:absolute; top:8px; right:20px; width:42px; height:50px; opacity:0.85;}
+  .steam-wrap path{
+    fill:none; stroke:#fff; stroke-width:3; stroke-linecap:round;
+    opacity:0; animation:steamRise 3.2s ease-in-out infinite;
+  }
+  .steam-wrap path:nth-child(2){animation-delay:0.6s;}
+  .steam-wrap path:nth-child(3){animation-delay:1.2s;}
+  @keyframes steamRise{
+    0%{transform:translateY(6px) scale(0.9); opacity:0;}
+    25%{opacity:0.9;}
+    80%{opacity:0;}
+    100%{transform:translateY(-16px) scale(1.05); opacity:0;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .steam-wrap path{animation:none; opacity:0.6;}
+  }
+  .hero-title{font-size:22px; margin:0 0 3px; font-weight:800; line-height:1.15;}
+  .hero-tagline{font-size:13px; opacity:0.92; margin:0; font-weight:500;}
+
+  .today-card{
+    background:var(--card); border-radius:18px; box-shadow:var(--shadow-lg);
+    margin:-16px 18px 20px; padding:16px 20px;
+    display:flex; align-items:center; justify-content:space-between;
+    border:1px solid var(--border);
+  }
+  .today-card .label{font-size:12px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;}
+  .today-card .amount{font-size:28px; font-weight:800; color:var(--green-dark); font-family:'Baloo 2',cursive;}
+  .today-card .sub{font-size:12px; color:var(--muted); margin-top:2px;}
+
+  .nav-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; padding:0 18px;}
+  .nav-card{
+    background:var(--card); border:1px solid var(--border); border-radius:18px;
+    padding:20px 14px; text-align:center; box-shadow:var(--shadow);
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+  }
+  .nav-card .icon{font-size:30px;}
+  .nav-card .label{font-weight:700; font-size:14.5px;}
+
+  /* ---------- Item grid (billing + manage) ---------- */
+  .item-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:16px;
+  }
+  .item-card{
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:12px; box-shadow:var(--shadow); text-align:center; position:relative;
+  }
+  .item-card .thumb{font-size:32px; height:44px; display:flex; align-items:center; justify-content:center;}
+  .item-card .thumb img{width:44px; height:44px; object-fit:cover; border-radius:10px;}
+  .item-card .name{font-weight:700; font-size:14px; margin-top:2px;}
+  .item-card .price{color:var(--primary-dark); font-weight:700; font-size:13px; margin-top:2px; font-family:'Baloo 2',cursive;}
+  .stepper{display:flex; align-items:center; justify-content:center; gap:10px; margin-top:10px;}
+  .stepper button{
+    width:30px; height:30px; border-radius:50%; border:none;
+    background:var(--primary-soft); color:var(--primary-dark); font-size:17px; font-weight:800;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .stepper button.add-only{
+    width:auto; padding:8px 18px; border-radius:20px; background:var(--primary); color:#fff; font-size:13px; font-weight:700;
+  }
+  .stepper .qty{min-width:20px; font-weight:800; font-size:15px;}
+
+  /* ---------- Footer bar (billing) ---------- */
+  .footer-bar{
+    position:sticky; bottom:0; z-index:15;
+    background:var(--card); border-top:1px solid var(--border);
+    padding:12px 16px; display:flex; align-items:center; gap:10px;
+    box-shadow:0 -6px 18px rgba(43,27,18,0.10);
+  }
+  .footer-bar .clear-btn{
+    background:none; border:1.5px solid var(--danger); color:var(--danger);
+    padding:12px 14px; border-radius:14px; font-weight:700; font-size:13px;
+  }
+  .footer-bar .total-box{flex:1; text-align:center;}
+  .footer-bar .total-box .t-label{font-size:10px; color:var(--muted); font-weight:700; text-transform:uppercase;}
+  .footer-bar .total-box .t-amount{font-size:20px; font-weight:800; font-family:'Baloo 2',cursive; color:var(--text);}
+  .footer-bar .pay-btn{
+    background:var(--green); color:#fff; border:none; padding:14px 22px;
+    border-radius:14px; font-weight:800; font-size:14.5px; box-shadow:var(--shadow);
+  }
+  .footer-bar .pay-btn:disabled{background:#C9C2B8; box-shadow:none;}
+
+  /* ---------- Bill review sheet ---------- */
+  .sheet-overlay{
+    position:fixed; inset:0; background:rgba(43,27,18,0.35); z-index:24;
+    opacity:0; pointer-events:none; transition:opacity 0.25s;
+  }
+  .sheet-overlay.open{opacity:1; pointer-events:auto;}
+  .bill-sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:25;
+    max-width:520px; margin:0 auto;
+    background:var(--card); border-radius:22px 22px 0 0;
+    box-shadow:0 -10px 30px rgba(43,27,18,0.25);
+    transform:translateY(100%); transition:transform 0.28s ease;
+    max-height:70vh; display:flex; flex-direction:column;
+  }
+  .bill-sheet.open{transform:translateY(0);}
+  .sheet-handle{width:40px; height:5px; background:var(--border); border-radius:3px; margin:10px auto 4px;}
+  .sheet-head{display:flex; align-items:center; justify-content:space-between; padding:6px 18px 10px;}
+  .sheet-head h3{margin:0; font-size:16px;}
+  .sheet-head .clear-all-link{background:none; border:none; color:var(--danger); font-weight:700; font-size:12.5px;}
+  .sheet-body{overflow-y:auto; padding:0 14px; flex:1;}
+  .sheet-empty{text-align:center; color:var(--muted); padding:30px 10px; font-size:14px;}
+  .sheet-row{
+    display:flex; align-items:center; gap:10px; padding:10px 6px; border-bottom:1px solid var(--border);
+  }
+  .sheet-row .info{flex:1; min-width:0;}
+  .sheet-row .r-name{font-weight:700; font-size:14px;}
+  .sheet-row .r-sub{font-size:12px; color:var(--muted);}
+  .sheet-row .r-total{font-weight:800; font-size:14px; width:56px; text-align:right; font-family:'Baloo 2',cursive;}
+  .sheet-row .rm-btn{
+    width:26px; height:26px; border-radius:50%; border:none; background:var(--danger-soft); color:var(--danger);
+    font-size:13px; font-weight:800; flex-shrink:0;
+  }
+  .sheet-foot{
+    padding:12px 18px 18px; border-top:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .sheet-foot .grand{font-size:18px; font-weight:800; font-family:'Baloo 2',cursive;}
+
+  /* ---------- Pay screen ---------- */
+  .pay-wrap{padding:24px 20px; text-align:center;}
+  .pay-total-label{font-size:13px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;}
+  .pay-total-amount{font-size:44px; font-weight:800; font-family:'Baloo 2',cursive; color:var(--primary-dark); margin:4px 0 22px;}
+  .qr-box{
+    background:var(--card); border:1.5px dashed var(--border); border-radius:20px;
+    width:100%; aspect-ratio:1/1; max-width:280px; margin:0 auto 22px;
+    display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px;
+    padding:16px; overflow:hidden;
+  }
+  .qr-box img{width:100%; height:100%; object-fit:contain;}
+  .qr-box .qr-msg{color:var(--muted); font-size:13px; font-weight:600;}
+  .confirm-btn{
+    width:100%; background:var(--green); color:#fff; border:none; padding:16px;
+    border-radius:16px; font-weight:800; font-size:16px; box-shadow:var(--shadow);
+  }
+  .confirm-btn:disabled{background:#C9C2B8; box-shadow:none;}
+
+  /* ---------- Reports ---------- */
+  .stats-row{display:flex; gap:12px; padding:16px;}
+  .stat-card{
+    flex:1; background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:14px; box-shadow:var(--shadow);
+  }
+  .stat-card .s-label{font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase;}
+  .stat-card .s-amount{font-size:22px; font-weight:800; font-family:'Baloo 2',cursive; color:var(--green-dark); margin:2px 0;}
+  .stat-card .s-count{font-size:12px; color:var(--muted);}
+  .history-title{padding:4px 16px; font-size:14px; font-weight:700; color:var(--muted);}
+  .history-list{padding:0 16px; display:flex; flex-direction:column; gap:10px; max-height:44vh; overflow-y:auto;}
+  .history-item{
+    background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px 14px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .history-item .h-when{font-size:12px; color:var(--muted); font-weight:600; display:flex; align-items:center; gap:6px;}
+  .history-item .h-items{font-size:13px; margin-top:2px; color:var(--text); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .history-item .h-total{font-weight:800; font-family:'Baloo 2',cursive; color:var(--primary-dark); text-align:right;}
+  .pay-badge{
+    font-size:10px; font-weight:800; padding:2px 7px; border-radius:8px; text-transform:uppercase; letter-spacing:0.3px;
+  }
+  .pay-badge.cash{background:var(--green-soft); color:var(--green-dark);}
+  .pay-badge.upi{background:var(--upi-soft); color:var(--upi);}
+  .pay-badge.split{background:var(--primary-soft); color:var(--primary-dark);}
+  .history-empty{text-align:center; color:var(--muted); padding:26px; font-size:14px;}
+  .csv-btn{
+    margin:18px 16px 0; width:calc(100% - 32px); background:var(--accent); color:#3A2405; border:none;
+    padding:14px; border-radius:14px; font-weight:800; font-size:14.5px; box-shadow:var(--shadow);
+  }
+
+  /* ---------- Manage items ---------- */
+  .fab{
+    position:fixed; bottom:22px; right:calc(50% - 260px + 20px); z-index:18;
+    width:56px; height:56px; border-radius:50%; background:var(--primary); color:#fff;
+    border:none; font-size:26px; box-shadow:var(--shadow-lg); display:flex; align-items:center; justify-content:center;
+  }
+  @media (max-width:559px){ .fab{ right:20px; } }
+
+  /* ---------- Settings ---------- */
+  .settings-wrap{padding:16px;}
+  .settings-section{
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:16px; margin-bottom:14px; box-shadow:var(--shadow);
+  }
+  .settings-section h3{margin:0 0 10px; font-size:15px;}
+  .qr-preview{
+    width:120px; height:120px; border-radius:12px; border:1.5px dashed var(--border);
+    display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:10px; background:var(--bg);
+  }
+  .qr-preview img{width:100%; height:100%; object-fit:contain;}
+  .upload-btn{
+    display:inline-block; background:var(--primary-soft); color:var(--primary-dark); border:none;
+    padding:10px 16px; border-radius:12px; font-weight:700; font-size:13px;
+  }
+  .pin-info-row{display:flex; align-items:center; justify-content:space-between; font-size:14px;}
+  .danger-btn{
+    width:100%; background:var(--danger-soft); color:var(--danger); border:1.5px solid var(--danger);
+    padding:13px; border-radius:14px; font-weight:700; font-size:14px; margin-top:10px;
+  }
+
+  /* ---------- Modal (add/edit item) ---------- */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(43,27,18,0.4); z-index:40;
+    display:none; align-items:flex-end; justify-content:center;
+  }
+  .modal-backdrop.open{display:flex;}
+  .modal-sheet{
+    background:var(--card); width:100%; max-width:520px; border-radius:22px 22px 0 0;
+    padding:20px 20px 26px; max-height:88vh; overflow-y:auto;
+  }
+  .modal-sheet h3{margin:0 0 14px;}
+  .field-label{font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:6px; display:block;}
+  .text-input{
+    width:100%; padding:13px 14px; border-radius:12px; border:1.5px solid var(--border);
+    font-size:15px; margin-bottom:16px; background:var(--bg); color:var(--text);
+  }
+  .price-display{
+    background:var(--bg); border:1.5px solid var(--border); border-radius:12px;
+    padding:14px; text-align:center; font-size:26px; font-weight:800; font-family:'Baloo 2',cursive;
+    margin-bottom:10px; color:var(--primary-dark);
+  }
+  .keypad{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px;}
+  .keypad button{
+    padding:15px 0; border-radius:12px; border:1px solid var(--border); background:var(--card);
+    font-size:18px; font-weight:700; color:var(--text);
+  }
+  .emoji-row{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;}
+  .emoji-choice{
+    width:42px; height:42px; border-radius:12px; border:2px solid var(--border); background:var(--card);
+    font-size:20px; display:flex; align-items:center; justify-content:center;
+  }
+  .emoji-choice.selected{border-color:var(--primary); background:var(--primary-soft);}
+  .cat-select-row{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;}
+  .cat-select-chip{
+    border:1.5px solid var(--border); background:var(--card); color:var(--muted);
+    padding:9px 14px; border-radius:16px; font-weight:700; font-size:13px;
+  }
+  .cat-select-chip.selected{border-color:var(--primary); background:var(--primary-soft); color:var(--primary-dark);}
+  .modal-actions{display:flex; gap:10px;}
+  .btn-primary{
+    flex:1; background:var(--primary); color:#fff; border:none; padding:14px; border-radius:14px; font-weight:800; font-size:15px;
+  }
+  .btn-secondary{
+    flex:1; background:var(--bg); color:var(--text); border:1.5px solid var(--border); padding:14px; border-radius:14px; font-weight:700; font-size:15px;
+  }
+  .btn-delete{
+    width:100%; background:none; border:none; color:var(--danger); font-weight:700; font-size:13.5px; margin-top:14px; padding:6px;
+  }
+
+  /* ---------- PIN overlay ---------- */
+  .pin-overlay{
+    position:fixed; inset:0; background:var(--primary); z-index:60; color:#fff;
+    display:none; flex-direction:column; align-items:center; justify-content:center; padding:30px;
+  }
+  .pin-overlay.open{display:flex;}
+  .pin-overlay h3{margin:0 0 6px; font-size:19px;}
+  .pin-overlay p{margin:0 0 20px; opacity:0.85; font-size:13px;}
+  .pin-dots{display:flex; gap:14px; margin-bottom:26px;}
+  .pin-dot{width:14px; height:14px; border-radius:50%; border:2px solid #fff; background:transparent;}
+  .pin-dot.filled{background:#fff;}
+  .pin-keypad{display:grid; grid-template-columns:repeat(3,64px); gap:14px;}
+  .pin-keypad button{
+    width:64px; height:64px; border-radius:50%; border:none; background:rgba(255,255,255,0.15); color:#fff; font-size:20px; font-weight:700;
+  }
+  .pin-cancel{margin-top:22px; background:none; border:none; color:#fff; opacity:0.8; font-weight:600; text-decoration:underline; font-size:13px;}
+  .pin-error{color:var(--accent); font-size:13px; height:16px; margin-bottom:4px;}
+
+  /* ---------- Toast ---------- */
+  .toast-container{position:fixed; bottom:90px; left:0; right:0; z-index:70; display:flex; flex-direction:column; align-items:center; gap:8px; pointer-events:none;}
+  .toast{
+    background:var(--text); color:#fff; padding:10px 18px; border-radius:24px; font-size:13.5px; font-weight:600;
+    box-shadow:var(--shadow-lg); opacity:0; transform:translateY(10px); transition:all 0.25s;
+  }
+  .toast.show{opacity:1; transform:translateY(0);}
+
+  .empty-state{text-align:center; color:var(--muted); padding:40px 20px; font-size:14px;}
+</style>
+</head>
+<body>
+
+<!-- ===================== HOME ===================== -->
+<div class="screen active" id="screen-home">
+  <div class="home-hero">
+    <svg class="steam-wrap" viewBox="0 0 60 70"><path d="M20 55 Q28 45 20 35 Q12 25 20 15"/><path d="M32 55 Q40 45 32 35 Q24 25 32 15"/><path d="M44 55 Q52 45 44 35 Q36 25 44 15"/></svg>
+    <div class="hero-title">🫖 Friends Tea Kadai</div>
+    <p class="hero-tagline">Chat Pannunga Tea kudichute</p>
+  </div>
+  <div class="today-card">
+    <div>
+      <div class="label">Today's Sales</div>
+      <div class="amount" id="home-today-amount">₹0</div>
+      <div class="sub" id="home-today-count">0 bills</div>
+    </div>
+    <div style="font-size:36px;">💰</div>
+  </div>
+  <div class="nav-grid">
+    <button class="nav-card press" onclick="goBilling()">
+      <div class="icon">🧾</div><div class="label">Bill Now</div>
+    </button>
+    <button class="nav-card press" onclick="showScreen('reports')">
+      <div class="icon">📊</div><div class="label">Reports</div>
+    </button>
+    <button class="nav-card press" onclick="requestPin('manage')">
+      <div class="icon">🍪</div><div class="label">Manage Items</div>
+    </button>
+    <button class="nav-card press" onclick="requestPin('settings')">
+      <div class="icon">⚙️</div><div class="label">Settings</div>
+    </button>
+  </div>
+</div>
+
+<!-- ===================== BILLING ===================== -->
+<div class="screen" id="screen-billing">
+  <div class="topbar">
+    <button class="back-btn press" onclick="goHome()">←</button>
+    <h2>Bill Now</h2>
+    <button class="badge-btn press" onclick="toggleSheet(true)">View Bill <span class="badge-count" id="cart-badge">0</span></button>
+  </div>
+  <div class="search-wrap">
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="billing-search" placeholder="Search items..." oninput="renderBilling()">
+      <button class="search-clear press" id="billing-search-clear" style="display:none;" onclick="clearBillingSearch()">✕</button>
+    </div>
+  </div>
+  <div class="cat-tabs" id="billing-cat-tabs"></div>
+  <div class="item-grid" id="billing-grid"></div>
+  <div class="footer-bar">
+    <button class="clear-btn press" onclick="clearCart()">Clear</button>
+    <button class="total-box" style="border:none;background:none;" onclick="toggleSheet(true)">
+      <div class="t-label">Total</div>
+      <div class="t-amount" id="footer-total">₹0</div>
+    </button>
+    <button class="pay-btn press" id="pay-now-btn" onclick="goPay()" disabled>Pay Now</button>
+  </div>
+</div>
+
+<!-- Bill review sheet -->
+<div class="sheet-overlay" id="sheet-overlay" onclick="toggleSheet(false)"></div>
+<div class="bill-sheet" id="bill-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h3>Your Bill</h3>
+    <button class="clear-all-link press" onclick="clearCart()">Clear All</button>
+  </div>
+  <div class="sheet-body" id="sheet-body"></div>
+  <div class="sheet-foot">
+    <span style="color:var(--muted); font-size:13px; font-weight:600;">Grand Total</span>
+    <span class="grand" id="sheet-grand-total">₹0</span>
+  </div>
+</div>
+
+<!-- ===================== PAY ===================== -->
+<div class="screen" id="screen-pay">
+  <div class="topbar">
+    <button class="back-btn press" onclick="showScreen('billing')">←</button>
+    <h2>Payment</h2>
+    <span style="width:36px;"></span>
+  </div>
+  <div class="pay-wrap">
+    <div class="pay-total-label">Amount to Collect</div>
+    <div class="pay-total-amount" id="pay-amount">₹0</div>
+
+    <div class="pay-method-tabs">
+      <button class="pay-method-tab press active" id="pmt-cash" onclick="setPayMethod('cash')">💵 Cash</button>
+      <button class="pay-method-tab press" id="pmt-upi" onclick="setPayMethod('upi')">📲 UPI</button>
+      <button class="pay-method-tab press" id="pmt-split" onclick="setPayMethod('split')">🔀 Split</button>
+    </div>
+
+    <div id="pay-qr-section" style="display:none;">
+      <div class="qr-box compact" id="pay-qr-box">
+        <span class="qr-msg">📷 No QR uploaded yet.<br>Add one in Settings.</span>
+      </div>
+    </div>
+
+    <div id="pay-split-section" style="display:none; text-align:left;">
+      <div class="split-row">
+        <div class="sr-label"><span class="sr-tag" style="background:var(--cash);"></span>Cash</div>
+        <input type="number" id="split-cash-input" inputmode="decimal" oninput="onSplitInput('cash')">
+      </div>
+      <div class="split-row">
+        <div class="sr-label"><span class="sr-tag" style="background:var(--upi);"></span>UPI</div>
+        <input type="number" id="split-upi-input" inputmode="decimal" oninput="onSplitInput('upi')">
+      </div>
+      <div class="split-hint" id="split-hint"></div>
+    </div>
+
+    <button class="confirm-btn press" id="confirm-pay-btn" onclick="confirmPayment()">✅ Payment Received</button>
+  </div>
+</div>
+
+<!-- ===================== REPORTS ===================== -->
+<div class="screen" id="screen-reports">
+  <div class="topbar">
+    <button class="back-btn press" onclick="goHome()">←</button>
+    <h2>Reports</h2>
+    <span style="width:36px;"></span>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="s-label">Today</div>
+      <div class="s-amount" id="rep-today-amount">₹0</div>
+      <div class="s-count" id="rep-today-count">0 bills</div>
+    </div>
+    <div class="stat-card">
+      <div class="s-label">This Month</div>
+      <div class="s-amount" id="rep-month-amount">₹0</div>
+      <div class="s-count" id="rep-month-count">0 bills</div>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-head">
+      <h4>Sales Trend</h4>
+      <div class="chart-toggle">
+        <button class="press active" id="chart-daily-btn" onclick="setChartRange('daily')">Daily</button>
+        <button class="press" id="chart-weekly-btn" onclick="setChartRange('weekly')">Weekly</button>
+      </div>
+    </div>
+    <div class="chart-canvas-wrap">
+      <canvas id="sales-chart" width="600" height="240" style="width:100%; height:100%;"></canvas>
+    </div>
+  </div>
+  <div class="history-title">Bill History</div>
+  <div class="history-list" id="history-list"></div>
+  <button class="csv-btn press" onclick="downloadCSV()">⬇️ Download CSV</button>
+</div>
+
+<!-- ===================== MANAGE ITEMS ===================== -->
+<div class="screen" id="screen-manage">
+  <div class="topbar">
+    <button class="back-btn press" onclick="goHome()">←</button>
+    <h2>Manage Items</h2>
+    <span style="width:36px;"></span>
+  </div>
+  <div class="cat-tabs" id="manage-cat-tabs"></div>
+  <div class="item-grid" id="manage-grid" style="padding-bottom:90px;"></div>
+  <button class="fab press" onclick="openItemModal(null)">+</button>
+</div>
+
+<!-- ===================== SETTINGS ===================== -->
+<div class="screen" id="screen-settings">
+  <div class="topbar">
+    <button class="back-btn press" onclick="goHome()">←</button>
+    <h2>Settings</h2>
+    <span style="width:36px;"></span>
+  </div>
+  <div class="settings-wrap">
+    <div class="settings-section">
+      <h3>Payment QR Code</h3>
+      <div class="qr-preview" id="settings-qr-preview">
+        <span style="font-size:11px; color:var(--muted); text-align:center; padding:6px;">No QR set</span>
+      </div>
+      <label class="upload-btn press">📁 Upload QR<input type="file" accept="image/*" style="display:none;" onchange="handleQrUpload(event)"></label>
+      <button class="danger-btn press" style="margin-top:10px;" onclick="removeQr()">🗑️ Remove QR Code</button>
+    </div>
+    <div class="settings-section">
+      <h3>PIN Lock</h3>
+      <div class="pin-info-row">
+        <span>PIN protects Settings &amp; Manage Items</span>
+      </div>
+      <button class="upload-btn press" style="margin-top:12px;" onclick="openChangePin()">🔑 Change PIN</button>
+    </div>
+    <div class="settings-section">
+      <h3>Danger Zone</h3>
+      <button class="danger-btn press" onclick="clearAllSales()">🗑️ Clear All Sales Data</button>
+      <button class="danger-btn press" onclick="resetItemsToDefault()">♻️ Reset Items to Default</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ITEM MODAL ===================== -->
+<div class="modal-backdrop" id="item-modal-backdrop">
+  <div class="modal-sheet">
+    <h3 id="item-modal-title">Add Item</h3>
+    <span class="field-label">Item Name</span>
+    <input type="text" class="text-input" id="item-name-input" placeholder="e.g. Ginger Tea">
+    <span class="field-label">Price (₹)</span>
+    <div class="price-display" id="item-price-display">0</div>
+    <div class="keypad" id="item-keypad"></div>
+    <span class="field-label">Category</span>
+    <div class="cat-select-row" id="item-cat-row"></div>
+    <span class="field-label">Icon</span>
+    <div class="emoji-row" id="item-emoji-row"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary press" onclick="closeItemModal()">Cancel</button>
+      <button class="btn-primary press" onclick="saveItem()">Save Item</button>
+    </div>
+    <button class="btn-delete press" id="item-delete-btn" onclick="deleteItem()" style="display:none;">Delete this item</button>
+  </div>
+</div>
+
+<!-- ===================== PIN OVERLAY ===================== -->
+<div class="pin-overlay" id="pin-overlay">
+  <h3 id="pin-title">Enter PIN</h3>
+  <p id="pin-sub">Protecting Settings &amp; Item management</p>
+  <div class="pin-error" id="pin-error"></div>
+  <div class="pin-dots" id="pin-dots"></div>
+  <div class="pin-keypad" id="pin-keypad"></div>
+  <button class="pin-cancel press" onclick="cancelPin()">Cancel</button>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+/* ============================================================
+   FRIENDS TEA KADAI — POS APP
+   ============================================================ */
+const CURRENCY = '₹';
+const STORAGE_KEYS = { items:'ftk_items', sales:'ftk_sales', settings:'ftk_settings' };
+
+const CATEGORIES = [
+  {id:'tea', label:'Tea', icon:'🫖'},
+  {id:'snacks', label:'Snacks', icon:'🥨'},
+  {id:'sweets', label:'Sweets', icon:'🍬'},
+  {id:'other', label:'Other', icon:'🧺'}
+];
+
+const DEFAULT_ITEMS = [
+  {id:'i1', name:'Tea', price:15, emoji:'☕', photo:null, category:'tea'},
+  {id:'i2', name:'Black Tea', price:15, emoji:'🍵', photo:null, category:'tea'},
+  {id:'i3', name:'Ginger Tea', price:30, emoji:'🫖', photo:null, category:'tea'},
+  {id:'i4', name:'Elaichi Tea', price:30, emoji:'🌿', photo:null, category:'tea'},
+  {id:'i5', name:'Sulaimani', price:30, emoji:'🍂', photo:null, category:'tea'},
+  {id:'i6', name:'Filter Coffee', price:20, emoji:'☕', photo:null, category:'tea'},
+  {id:'i7', name:'Salt Biscuit', price:10, emoji:'🍪', photo:null, category:'snacks'},
+  {id:'i8', name:'Murukku', price:10, emoji:'🥨', photo:null, category:'snacks'},
+  {id:'i9', name:'Kadala Mittai', price:10, emoji:'🍬', photo:null, category:'sweets'}
+];
+
+const EMOJI_CHOICES = ['☕','🍵','🫖','🌿','🍂','🍪','🥨','🍬','🧁','🍩','🥛','🍯','🥧','🍮'];
+
+let state = {
+  items: [],
+  cart: [],       // {id,name,price,qty}
+  sales: [],
+  settings: { qr:null, pin:'1234' }
+};
+
+let pendingPinTarget = null;
+let pinBuffer = '';
+let editingItemId = null;
+let modalPriceStr = '0';
+let modalEmoji = '☕';
+let modalPhoto = null;
+let modalCategory = 'tea';
+let changingPin = false;
+let newPinStage = 0;
+let newPinFirst = '';
+
+/* billing/manage filters */
+let billingCat = 'all';
+let manageCat = 'all';
+
+/* payment */
+let payMethod = 'cash';
+
+/* reports chart */
+let chartRange = 'daily';
+
+/* ---------------- Persistence ---------------- */
+function loadState(){
+  try{
+    const items = localStorage.getItem(STORAGE_KEYS.items);
+    const sales = localStorage.getItem(STORAGE_KEYS.sales);
+    const settings = localStorage.getItem(STORAGE_KEYS.settings);
+    state.items = items ? JSON.parse(items) : DEFAULT_ITEMS.map(i=>({...i}));
+    state.items.forEach(i=>{ if(!i.category) i.category = 'other'; });
+    state.sales = sales ? JSON.parse(sales) : [];
+    state.settings = settings ? JSON.parse(settings) : { qr:null, pin:'1234' };
+    if(!items) saveItems();
+    if(!settings) saveSettings();
+  }catch(e){
+    state.items = DEFAULT_ITEMS.map(i=>({...i}));
+    state.sales = [];
+    state.settings = { qr:null, pin:'1234' };
+  }
+}
+function saveItems(){ localStorage.setItem(STORAGE_KEYS.items, JSON.stringify(state.items)); }
+function saveSales(){ localStorage.setItem(STORAGE_KEYS.sales, JSON.stringify(state.sales)); }
+function saveSettings(){ localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(state.settings)); }
+
+/* ---------------- Navigation ---------------- */
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  if(name==='home') renderHome();
+  if(name==='billing') renderBilling();
+  if(name==='reports') renderReports();
+  if(name==='manage') renderManage();
+  if(name==='settings') renderSettings();
+  if(name==='pay') renderPay();
+  window.scrollTo(0,0);
+}
+function goHome(){ toggleSheet(false); showScreen('home'); }
+function goBilling(){ showScreen('billing'); }
+
+/* ---------------- Toast ---------------- */
+function toast(msg){
+  const c = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  c.appendChild(el);
+  requestAnimationFrame(()=> el.classList.add('show'));
+  setTimeout(()=>{
+    el.classList.remove('show');
+    setTimeout(()=> el.remove(), 300);
+  }, 1800);
+}
+
+/* ---------------- Home ---------------- */
+function todaysSales(){
+  const today = new Date().toDateString();
+  return state.sales.filter(s => new Date(s.timestamp).toDateString() === today);
+}
+function monthsSales(){
+  const now = new Date();
+  return state.sales.filter(s=>{
+    const d = new Date(s.timestamp);
+    return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth();
+  });
+}
+function renderHome(){
+  const t = todaysSales();
+  const total = t.reduce((a,s)=>a+s.total,0);
+  document.getElementById('home-today-amount').textContent = CURRENCY+total;
+  document.getElementById('home-today-count').textContent = t.length + (t.length===1?' bill':' bills');
+}
+
+/* ---------------- Billing ---------------- */
+function cartQty(id){
+  const c = state.cart.find(c=>c.id===id);
+  return c ? c.qty : 0;
+}
+function cartTotal(){
+  return state.cart.reduce((a,c)=>a + c.price*c.qty, 0);
+}
+function addQty(id, delta){
+  const item = state.items.find(i=>i.id===id);
+  if(!item) return;
+  let c = state.cart.find(c=>c.id===id);
+  if(!c && delta>0){
+    c = {id:item.id, name:item.name, price:item.price, qty:0};
+    state.cart.push(c);
+  }
+  if(c){
+    c.qty += delta;
+    if(c.qty<=0){
+      state.cart = state.cart.filter(x=>x.id!==id);
+    }
+  }
+  renderBilling();
+  renderSheet();
+}
+function removeFromCart(id){
+  state.cart = state.cart.filter(c=>c.id!==id);
+  renderBilling();
+  renderSheet();
+}
+function clearCart(){
+  if(state.cart.length===0){ toggleSheet(false); return; }
+  state.cart = [];
+  renderBilling();
+  renderSheet();
+  toast('Bill cleared');
+}
+function categoriesInUse(){
+  const used = new Set(state.items.map(i=>i.category||'other'));
+  return CATEGORIES.filter(c=>used.has(c.id));
+}
+function renderCatTabs(containerId, activeVal, onPick){
+  const el = document.getElementById(containerId);
+  const cats = categoriesInUse();
+  const all = [{id:'all', label:'All', icon:'🍽️'}, ...cats];
+  el.innerHTML = all.map(c=>`
+    <button class="cat-chip press${c.id===activeVal?' active':''}" onclick="${onPick}('${c.id}')">${c.icon} ${c.label}</button>
+  `).join('');
+}
+function setBillingCat(id){ billingCat = id; renderBilling(); }
+function setManageCat(id){ manageCat = id; renderManage(); }
+function clearBillingSearch(){
+  document.getElementById('billing-search').value = '';
+  renderBilling();
+}
+function filteredItems(list, cat, searchTerm){
+  return list.filter(item=>{
+    const matchCat = cat==='all' || (item.category||'other')===cat;
+    const matchSearch = !searchTerm || item.name.toLowerCase().includes(searchTerm);
+    return matchCat && matchSearch;
+  });
+}
+function renderBilling(){
+  renderCatTabs('billing-cat-tabs', billingCat, 'setBillingCat');
+  const searchInput = document.getElementById('billing-search');
+  const term = searchInput ? searchInput.value.trim().toLowerCase() : '';
+  document.getElementById('billing-search-clear').style.display = term ? 'flex' : 'none';
+  const grid = document.getElementById('billing-grid');
+  grid.innerHTML = '';
+  const items = filteredItems(state.items, billingCat, term);
+  if(items.length===0){
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">No items match. Try a different search or category.</div>`;
+  }
+  items.forEach(item=>{
+    const qty = cartQty(item.id);
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    card.innerHTML = `
+      <div class="thumb">${item.photo ? `<img src="${item.photo}">` : item.emoji}</div>
+      <div class="name">${escapeHtml(item.name)}</div>
+      <div class="price">${CURRENCY}${item.price}</div>
+      ${qty>0 ? `
+        <div class="stepper">
+          <button class="press" onclick="addQty('${item.id}',-1)">−</button>
+          <span class="qty">${qty}</span>
+          <button class="press" onclick="addQty('${item.id}',1)">+</button>
+        </div>` : `
+        <div class="stepper">
+          <button class="add-only press" onclick="addQty('${item.id}',1)">Add</button>
+        </div>`}
+    `;
+    grid.appendChild(card);
+  });
+  const total = cartTotal();
+  const count = state.cart.reduce((a,c)=>a+c.qty,0);
+  document.getElementById('footer-total').textContent = CURRENCY+total;
+  document.getElementById('cart-badge').textContent = count;
+  document.getElementById('pay-now-btn').disabled = total<=0;
+}
+
+/* ---------------- Bill review sheet ---------------- */
+function toggleSheet(open){
+  const sheet = document.getElementById('bill-sheet');
+  const overlay = document.getElementById('sheet-overlay');
+  if(open){
+    renderSheet();
+    sheet.classList.add('open');
+    overlay.classList.add('open');
+  }else{
+    sheet.classList.remove('open');
+    overlay.classList.remove('open');
+  }
+}
+function renderSheet(){
+  const body = document.getElementById('sheet-body');
+  if(state.cart.length===0){
+    body.innerHTML = `<div class="sheet-empty">🧺 No items added yet</div>`;
+  }else{
+    body.innerHTML = state.cart.map(c=>`
+      <div class="sheet-row">
+        <div class="info">
+          <div class="r-name">${escapeHtml(c.name)}</div>
+          <div class="r-sub">${CURRENCY}${c.price} × ${c.qty}</div>
+        </div>
+        <div class="stepper" style="margin-top:0;">
+          <button class="press" onclick="addQty('${c.id}',-1)">−</button>
+          <span class="qty">${c.qty}</span>
+          <button class="press" onclick="addQty('${c.id}',1)">+</button>
+        </div>
+        <div class="r-total">${CURRENCY}${c.price*c.qty}</div>
+        <button class="rm-btn press" onclick="removeFromCart('${c.id}')">✕</button>
+      </div>
+    `).join('');
+  }
+  document.getElementById('sheet-grand-total').textContent = CURRENCY+cartTotal();
+}
+
+/* ---------------- Pay ---------------- */
+function goPay(){
+  if(cartTotal()<=0) return;
+  toggleSheet(false);
+  payMethod = 'cash';
+  showScreen('pay');
+}
+function renderPay(){
+  const total = cartTotal();
+  document.getElementById('pay-amount').textContent = CURRENCY+total;
+  const box = document.getElementById('pay-qr-box');
+  if(state.settings.qr){
+    box.innerHTML = `<img src="${state.settings.qr}">`;
+  }else{
+    box.innerHTML = `<span class="qr-msg">📷 No QR uploaded yet.<br>Add one in Settings.</span>`;
+  }
+  document.getElementById('split-cash-input').value = total;
+  document.getElementById('split-upi-input').value = 0;
+  setPayMethod('cash');
+}
+function setPayMethod(method){
+  payMethod = method;
+  document.getElementById('pmt-cash').classList.toggle('active', method==='cash');
+  document.getElementById('pmt-upi').classList.toggle('active', method==='upi');
+  document.getElementById('pmt-split').classList.toggle('active', method==='split');
+  document.getElementById('pay-qr-section').style.display = (method==='upi') ? 'block' : 'none';
+  document.getElementById('pay-split-section').style.display = (method==='split') ? 'block' : 'none';
+  if(method==='split') validateSplit();
+  document.getElementById('confirm-pay-btn').disabled = false;
+}
+function onSplitInput(which){
+  const total = cartTotal();
+  const cashInput = document.getElementById('split-cash-input');
+  const upiInput = document.getElementById('split-upi-input');
+  if(which==='cash'){
+    const cash = parseFloat(cashInput.value)||0;
+    upiInput.value = Math.max(0, +(total - cash).toFixed(2));
+  }else{
+    const upi = parseFloat(upiInput.value)||0;
+    cashInput.value = Math.max(0, +(total - upi).toFixed(2));
+  }
+  validateSplit();
+}
+function validateSplit(){
+  const total = cartTotal();
+  const cash = parseFloat(document.getElementById('split-cash-input').value)||0;
+  const upi = parseFloat(document.getElementById('split-upi-input').value)||0;
+  const hint = document.getElementById('split-hint');
+  const diff = Math.abs((cash+upi) - total);
+  const ok = diff < 0.01;
+  hint.textContent = ok ? '✓ Matches total' : `Adds up to ${CURRENCY}${(cash+upi).toFixed(2)}, needs ${CURRENCY}${total}`;
+  hint.className = 'split-hint ' + (ok ? 'ok' : 'bad');
+  document.getElementById('confirm-pay-btn').disabled = !ok;
+  return ok;
+}
+function confirmPayment(){
+  if(state.cart.length===0) return;
+  const total = cartTotal();
+  let payment;
+  if(payMethod==='cash'){
+    payment = {method:'cash', cash:total, upi:0};
+  }else if(payMethod==='upi'){
+    payment = {method:'upi', cash:0, upi:total};
+  }else{
+    if(!validateSplit()) return;
+    const cash = parseFloat(document.getElementById('split-cash-input').value)||0;
+    const upi = parseFloat(document.getElementById('split-upi-input').value)||0;
+    payment = {method:'split', cash, upi};
+  }
+  const sale = {
+    id: 's_'+Date.now(),
+    timestamp: Date.now(),
+    items: state.cart.map(c=>({name:c.name, qty:c.qty, price:c.price, subtotal:c.price*c.qty})),
+    total: total,
+    payment: payment
+  };
+  state.sales.unshift(sale);
+  saveSales();
+  state.cart = [];
+  toast('Payment saved ✅');
+  showScreen('home');
+}
+
+/* ---------------- Reports ---------------- */
+function renderReports(){
+  const t = todaysSales();
+  const m = monthsSales();
+  document.getElementById('rep-today-amount').textContent = CURRENCY+t.reduce((a,s)=>a+s.total,0);
+  document.getElementById('rep-today-count').textContent = t.length + (t.length===1?' bill':' bills');
+  document.getElementById('rep-month-amount').textContent = CURRENCY+m.reduce((a,s)=>a+s.total,0);
+  document.getElementById('rep-month-count').textContent = m.length + (m.length===1?' bill':' bills');
+
+  const list = document.getElementById('history-list');
+  if(state.sales.length===0){
+    list.innerHTML = `<div class="history-empty">No bills yet. Sales will show up here.</div>`;
+  }else{
+    list.innerHTML = state.sales.map(s=>{
+      const d = new Date(s.timestamp);
+      const when = d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}) + ' · ' + d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+      const itemsStr = s.items.map(i=>`${i.name} x${i.qty}`).join(', ');
+      const method = (s.payment && s.payment.method) || 'cash';
+      const badgeLabel = method==='cash' ? '💵 Cash' : method==='upi' ? '📲 UPI' : '🔀 Split';
+      return `<div class="history-item">
+        <div>
+          <div class="h-when">${when} <span class="pay-badge ${method}">${badgeLabel}</span></div>
+          <div class="h-items">${escapeHtml(itemsStr)}</div>
+        </div>
+        <div class="h-total">${CURRENCY}${s.total}</div>
+      </div>`;
+    }).join('');
+  }
+  drawSalesChart();
+}
+function setChartRange(range){
+  chartRange = range;
+  document.getElementById('chart-daily-btn').classList.toggle('active', range==='daily');
+  document.getElementById('chart-weekly-btn').classList.toggle('active', range==='weekly');
+  drawSalesChart();
+}
+function startOfWeek(d){
+  const nd = new Date(d);
+  const day = nd.getDay();
+  nd.setDate(nd.getDate() - day);
+  nd.setHours(0,0,0,0);
+  return nd;
+}
+function drawSalesChart(){
+  const canvas = document.getElementById('sales-chart');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  let labels = [], values = [];
+  if(chartRange==='daily'){
+    const days = [];
+    for(let i=6;i>=0;i--){
+      const d = new Date();
+      d.setDate(d.getDate()-i);
+      days.push(d);
+    }
+    labels = days.map(d=>d.toLocaleDateString('en-IN',{weekday:'short'}));
+    values = days.map(d=>{
+      const key = d.toDateString();
+      return state.sales.filter(s=>new Date(s.timestamp).toDateString()===key).reduce((a,s)=>a+s.total,0);
+    });
+  }else{
+    const weeks = [];
+    for(let i=7;i>=0;i--){
+      const d = startOfWeek(new Date());
+      d.setDate(d.getDate() - i*7);
+      weeks.push(d);
+    }
+    labels = weeks.map(d=>d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}));
+    values = weeks.map(wStart=>{
+      const wEnd = new Date(wStart); wEnd.setDate(wEnd.getDate()+7);
+      return state.sales.filter(s=>{
+        const t = s.timestamp;
+        return t>=wStart.getTime() && t<wEnd.getTime();
+      }).reduce((a,s)=>a+s.total,0);
+    });
+  }
+
+  const max = Math.max(...values, 1);
+  const padL = 6, padR = 6, padTop = 16, padBottom = 26;
+  const chartW = W - padL - padR;
+  const chartH = H - padTop - padBottom;
+  const n = values.length;
+  const gap = 10;
+  const barW = (chartW - gap*(n-1)) / n;
+
+  ctx.font = '600 18px Mukta, sans-serif';
+  ctx.textAlign = 'center';
+
+  values.forEach((v,i)=>{
+    const x = padL + i*(barW+gap);
+    const barH = max>0 ? (v/max) * chartH : 0;
+    const y = padTop + chartH - barH;
+    const grad = ctx.createLinearGradient(0,y,0,padTop+chartH);
+    grad.addColorStop(0, '#E8A33D');
+    grad.addColorStop(1, '#B8431C');
+    ctx.fillStyle = grad;
+    const r = Math.min(8, barW/2);
+    roundRectPath(ctx, x, y, barW, Math.max(barH,3), r);
+    ctx.fill();
+
+    ctx.fillStyle = '#8B7361';
+    ctx.font = '600 18px Mukta, sans-serif';
+    ctx.fillText(labels[i], x+barW/2, H-8);
+
+    if(v>0){
+      ctx.fillStyle = '#2B1B12';
+      ctx.font = '700 15px Mukta, sans-serif';
+      ctx.fillText(CURRENCY+v, x+barW/2, Math.max(y-6, 14));
+    }
+  });
+}
+function roundRectPath(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+function downloadCSV(){
+  let rows = [['Date','Time','Items','Total','Payment Method','Cash','UPI']];
+  state.sales.forEach(s=>{
+    const d = new Date(s.timestamp);
+    const date = d.toLocaleDateString('en-IN');
+    const time = d.toLocaleTimeString('en-IN');
+    const itemsStr = s.items.map(i=>`${i.name} x${i.qty}`).join('; ');
+    const p = s.payment || {method:'cash', cash:s.total, upi:0};
+    rows.push([date, time, itemsStr, s.total, p.method, p.cash, p.upi]);
+  });
+  const csv = rows.map(r => r.map(field=>{
+    const f = String(field).replace(/"/g,'""');
+    return /[",\n]/.test(f) ? `"${f}"` : f;
+  }).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'friends-tea-kadai-sales.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast('CSV downloaded');
+}
+
+/* ---------------- Manage items ---------------- */
+function renderManage(){
+  renderCatTabs('manage-cat-tabs', manageCat, 'setManageCat');
+  const grid = document.getElementById('manage-grid');
+  if(state.items.length===0){
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">No items yet. Tap + to add one.</div>`;
+    return;
+  }
+  const items = filteredItems(state.items, manageCat, '');
+  if(items.length===0){
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">No items in this category yet.</div>`;
+    return;
+  }
+  grid.innerHTML = '';
+  items.forEach(item=>{
+    const card = document.createElement('div');
+    card.className = 'item-card press';
+    card.style.cursor = 'pointer';
+    card.innerHTML = `
+      <div class="thumb">${item.photo ? `<img src="${item.photo}">` : item.emoji}</div>
+      <div class="name">${escapeHtml(item.name)}</div>
+      <div class="price">${CURRENCY}${item.price}</div>
+    `;
+    card.onclick = ()=> openItemModal(item.id);
+    grid.appendChild(card);
+  });
+}
+
+function buildKeypad(){
+  const keys = ['1','2','3','4','5','6','7','8','9','.','0','⌫'];
+  const kp = document.getElementById('item-keypad');
+  kp.innerHTML = '';
+  keys.forEach(k=>{
+    const b = document.createElement('button');
+    b.className='press';
+    b.textContent = k;
+    b.onclick = ()=> handleKeypad(k);
+    kp.appendChild(b);
+  });
+}
+function handleKeypad(k){
+  if(k==='⌫'){
+    modalPriceStr = modalPriceStr.length>1 ? modalPriceStr.slice(0,-1) : '0';
+  }else if(k==='.'){
+    if(!modalPriceStr.includes('.')) modalPriceStr += '.';
+  }else{
+    modalPriceStr = modalPriceStr==='0' ? k : modalPriceStr + k;
+  }
+  document.getElementById('item-price-display').textContent = modalPriceStr;
+}
+
+function buildCatRow(){
+  const row = document.getElementById('item-cat-row');
+  row.innerHTML = '';
+  CATEGORIES.forEach(c=>{
+    const b = document.createElement('button');
+    b.className = 'cat-select-chip press' + (c.id===modalCategory ? ' selected':'');
+    b.textContent = c.icon + ' ' + c.label;
+    b.onclick = ()=>{ modalCategory = c.id; buildCatRow(); };
+    row.appendChild(b);
+  });
+}
+function buildEmojiRow(){
+  const row = document.getElementById('item-emoji-row');
+  row.innerHTML = '';
+  EMOJI_CHOICES.forEach(e=>{
+    const b = document.createElement('button');
+    b.className = 'emoji-choice press' + (e===modalEmoji ? ' selected':'');
+    b.textContent = e;
+    b.onclick = ()=>{ modalEmoji = e; modalPhoto=null; buildEmojiRow(); };
+    row.appendChild(b);
+  });
+}
+
+function openItemModal(id){
+  editingItemId = id;
+  modalPhoto = null;
+  const backdrop = document.getElementById('item-modal-backdrop');
+  const title = document.getElementById('item-modal-title');
+  const nameInput = document.getElementById('item-name-input');
+  const delBtn = document.getElementById('item-delete-btn');
+  if(id){
+    const item = state.items.find(i=>i.id===id);
+    title.textContent = 'Edit Item';
+    nameInput.value = item.name;
+    modalPriceStr = String(item.price);
+    modalEmoji = item.emoji;
+    modalPhoto = item.photo || null;
+    modalCategory = item.category || 'other';
+    delBtn.style.display = 'block';
+  }else{
+    title.textContent = 'Add Item';
+    nameInput.value = '';
+    modalPriceStr = '0';
+    modalEmoji = '☕';
+    modalCategory = 'tea';
+    delBtn.style.display = 'none';
+  }
+  document.getElementById('item-price-display').textContent = modalPriceStr;
+  buildKeypad();
+  buildCatRow();
+  buildEmojiRow();
+  backdrop.classList.add('open');
+}
+function closeItemModal(){
+  document.getElementById('item-modal-backdrop').classList.remove('open');
+  editingItemId = null;
+}
+function saveItem(){
+  const name = document.getElementById('item-name-input').value.trim();
+  const price = parseFloat(modalPriceStr) || 0;
+  if(!name){ toast('Please enter an item name'); return; }
+  if(price<=0){ toast('Please enter a valid price'); return; }
+  if(editingItemId){
+    const item = state.items.find(i=>i.id===editingItemId);
+    item.name = name; item.price = price; item.emoji = modalEmoji; item.photo = modalPhoto; item.category = modalCategory;
+  }else{
+    state.items.push({id:'i_'+Date.now(), name, price, emoji:modalEmoji, photo:modalPhoto, category:modalCategory});
+  }
+  saveItems();
+  closeItemModal();
+  renderManage();
+  toast('Item saved');
+}
+function deleteItem(){
+  if(!editingItemId) return;
+  state.items = state.items.filter(i=>i.id!==editingItemId);
+  saveItems();
+  closeItemModal();
+  renderManage();
+  toast('Item deleted');
+}
+
+/* Photo upload inside item modal — reuses emoji row area via a hidden trick:
+   simplest approach: long-press not needed, add an upload button dynamically */
+(function addPhotoUploadButton(){
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const row = document.getElementById('item-emoji-row');
+    const wrap = row.parentElement;
+    const label = document.createElement('label');
+    label.className = 'upload-btn press';
+    label.style.marginBottom = '18px';
+    label.style.display = 'inline-block';
+    label.innerHTML = '📷 Use Photo Instead<input type="file" accept="image/*" capture="environment" style="display:none;">';
+    label.querySelector('input').addEventListener('change', handleItemPhotoUpload);
+    wrap.insertBefore(label, row.nextSibling);
+  });
+})();
+function handleItemPhotoUpload(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  resizeImage(file, 160, (dataUrl)=>{
+    modalPhoto = dataUrl;
+    toast('Photo added');
+  });
+}
+function resizeImage(file, maxSize, cb){
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      let w = img.width, h = img.height;
+      if(w>h){ if(w>maxSize){ h*=maxSize/w; w=maxSize; } }
+      else{ if(h>maxSize){ w*=maxSize/h; h=maxSize; } }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      cb(canvas.toDataURL('image/jpeg',0.7));
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetItemsToDefault(){
+  if(!confirm('Reset all items to the default tea stall menu? This cannot be undone.')) return;
+  state.items = DEFAULT_ITEMS.map(i=>({...i}));
+  saveItems();
+  renderManage();
+  toast('Items reset to default');
+}
+
+/* ---------------- Settings ---------------- */
+function renderSettings(){
+  const preview = document.getElementById('settings-qr-preview');
+  if(state.settings.qr){
+    preview.innerHTML = `<img src="${state.settings.qr}">`;
+  }else{
+    preview.innerHTML = `<span style="font-size:11px; color:var(--muted); text-align:center; padding:6px;">No QR set</span>`;
+  }
+}
+function handleQrUpload(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  resizeImage(file, 500, (dataUrl)=>{
+    state.settings.qr = dataUrl;
+    saveSettings();
+    renderSettings();
+    toast('QR code saved');
+  });
+}
+function removeQr(){
+  if(!confirm('Remove the payment QR code?')) return;
+  state.settings.qr = null;
+  saveSettings();
+  renderSettings();
+  toast('QR code removed');
+}
+function clearAllSales(){
+  if(!confirm('Delete all sales history? This cannot be undone.')) return;
+  state.sales = [];
+  saveSales();
+  toast('Sales history cleared');
+}
+
+/* ---------------- PIN flow ---------------- */
+function buildPinKeypad(){
+  const keys = ['1','2','3','4','5','6','7','8','9','','0','⌫'];
+  const kp = document.getElementById('pin-keypad');
+  kp.innerHTML = '';
+  keys.forEach(k=>{
+    const b = document.createElement('button');
+    b.className='press';
+    b.textContent = k;
+    b.style.visibility = k==='' ? 'hidden' : 'visible';
+    b.onclick = ()=> handlePinKey(k);
+    kp.appendChild(b);
+  });
+}
+function renderPinDots(){
+  const dots = document.getElementById('pin-dots');
+  dots.innerHTML = '';
+  for(let i=0;i<4;i++){
+    const d = document.createElement('div');
+    d.className = 'pin-dot' + (i<pinBuffer.length ? ' filled':'');
+    dots.appendChild(d);
+  }
+}
+function handlePinKey(k){
+  if(k==='') return;
+  if(k==='⌫'){ pinBuffer = pinBuffer.slice(0,-1); renderPinDots(); return; }
+  if(pinBuffer.length>=4) return;
+  pinBuffer += k;
+  renderPinDots();
+  if(pinBuffer.length===4){
+    setTimeout(()=> submitPin(), 150);
+  }
+}
+function submitPin(){
+  if(changingPin){
+    if(newPinStage===0){
+      newPinFirst = pinBuffer;
+      pinBuffer='';
+      newPinStage=1;
+      document.getElementById('pin-title').textContent = 'Confirm New PIN';
+      document.getElementById('pin-sub').textContent = 'Enter the new PIN again';
+      renderPinDots();
+      return;
+    }else{
+      if(pinBuffer===newPinFirst){
+        state.settings.pin = pinBuffer;
+        saveSettings();
+        closePinOverlay();
+        toast('PIN updated');
+      }else{
+        document.getElementById('pin-error').textContent = "PINs didn't match. Try again.";
+        pinBuffer=''; newPinStage=0;
+        document.getElementById('pin-title').textContent = 'Set New PIN';
+        document.getElementById('pin-sub').textContent = 'Enter a 4-digit PIN';
+        renderPinDots();
+      }
+      return;
+    }
+  }
+  if(pinBuffer === state.settings.pin){
+    closePinOverlay();
+    const target = pendingPinTarget;
+    pendingPinTarget = null;
+    showScreen(target);
+  }else{
+    document.getElementById('pin-error').textContent = 'Incorrect PIN. Try again.';
+    pinBuffer='';
+    renderPinDots();
+  }
+}
+function requestPin(target){
+  pendingPinTarget = target;
+  changingPin = false;
+  pinBuffer = '';
+  document.getElementById('pin-title').textContent = 'Enter PIN';
+  document.getElementById('pin-sub').textContent = 'Protecting Settings & Item management';
+  document.getElementById('pin-error').textContent = '';
+  buildPinKeypad();
+  renderPinDots();
+  document.getElementById('pin-overlay').classList.add('open');
+}
+function openChangePin(){
+  changingPin = true;
+  newPinStage = 0;
+  newPinFirst = '';
+  pinBuffer = '';
+  document.getElementById('pin-title').textContent = 'Set New PIN';
+  document.getElementById('pin-sub').textContent = 'Enter a 4-digit PIN';
+  document.getElementById('pin-error').textContent = '';
+  buildPinKeypad();
+  renderPinDots();
+  document.getElementById('pin-overlay').classList.add('open');
+}
+function cancelPin(){
+  closePinOverlay();
+}
+function closePinOverlay(){
+  document.getElementById('pin-overlay').classList.remove('open');
+  pinBuffer=''; changingPin=false; newPinStage=0; newPinFirst='';
+}
+
+/* ---------------- Utils ---------------- */
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/* ---------------- Init ---------------- */
+loadState();
+renderHome();
+</script>
+</body>
+</html>
