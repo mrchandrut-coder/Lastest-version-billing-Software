@@ -2,7 +2,7 @@
 
 A modern, mobile-first Point of Sale (POS) web application built for tea stalls, cafés, and small food businesses. Designed as a single HTML file, the application runs entirely in the browser without requiring a backend, database, or installation. All data is stored locally using the browser's Local Storage API, making it fast, lightweight, and offline-friendly.
 
-**Live Demo:** https://mrchandrut-coder.github.io/Lastest-version-Software-/
+**Live Demo:** https://mrchandrut-coder.github.io/Lastest-version-billing-Software/
 
 ---
 
