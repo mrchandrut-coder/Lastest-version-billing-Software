@@ -5,6 +5,9 @@ A modern, mobile-first Point of Sale (POS) web application built for tea stalls,
 **Live Demo:** https://mrchandrut-coder.github.io/Lastest-version-billing-Software/
 
 ---
+<img height="30" src="https://img.shields.io/github/repo-size/mrchandrut-coder/Lastest-version-software-?style=for-the-badge"/>
+
+---
 
 ## ✨ Features
 
